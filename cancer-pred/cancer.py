@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-data = pd.read_csv('datasets/cancer.csv')
+data = pd.read_csv('F:/my files/python files/neural networks/tensorflow_projects/cancer-pred/cancer.csv')
 feat = data.iloc[:, 2:32]
 feat = feat.values
 feat = feat.astype('float32')
@@ -15,24 +15,16 @@ labels = labels.astype('float32')
 labels = np.reshape(labels, (569, 2))
 print(feat[0].shape)
 
-def get_batches(inp1, oup, batch_size):
-    data = tf.data.Dataset.from_tensor_slices(inp1)
-    lab = tf.data.Dataset.from_tensor_slices(oup)
-    batched_data = tf.data.Dataset.zip((data, lab))
-    tot_data = batched_data.repeat().batch(batch_size)
-    iterator = tot_data.make_initializable_iterator()
-    sess.run(iterator.initializer)
-    next_batch = iterator.get_next()
-    return next_batch
-
-
 def ann(ip, wts, bias):
     dense_1 = tf.add(tf.matmul(ip, wts['wd1']), bias['wd1'])
     dense_1 = tf.nn.relu(dense_1)
+    #dense_1 = tf.nn.dropout(dense_1,keep_prob=0.3)
     dense_2 = tf.add(tf.matmul(dense_1, wts['wd2']), bias['wd2'])
     dense_2 = tf.nn.relu(dense_2)
+    #dense_2 = tf.nn.dropout(dense_2,keep_prob=0.3)
     dense_3 = tf.add(tf.matmul(dense_2, wts['wd3']), bias['wd3'])
     dense_3 = tf.nn.relu(dense_3)
+    #dense_3 = tf.nn.dropout(dense_3,keep_prob=0.3)
     dense_4 = tf.add(tf.matmul(dense_3, wts['wd4']), bias['wd4'])
     return dense_4
 
@@ -55,7 +47,7 @@ x_val = feat[test_size:]
 y_train = labels[:test_size]
 y_val = labels[test_size:]
 batch_size = 20
-num_epochs = 30
+num_epochs = 50
 pred = ann(inp, weights, biases)
 cost = tf.nn.sigmoid_cross_entropy_with_logits(logits=pred, labels=oup)
 cost = tf.reduce_mean(cost)
@@ -70,19 +62,13 @@ with tf.Session() as sess:
     sess.run(init)
     for i in range(num_epochs):
         num_batches = len(feat)//batch_size
-
-        for j in range(num_batches):
-            batch_x, batch_y = get_batches(feat, labels, 50)
-            val_x, val_y = get_batches(x_val, y_val, 569-test_size)
-            try:
-                batch_x = sess.run(batch_x)
-                batch_y = sess.run(batch_y)
-                val_x = sess.run(val_x)
-                val_y = sess.run(val_y)
-            except tf.errors.OutOfRangeError:
-                None
+        j = 0
+        for start,end in zip(range(0,len(x_train),batch_size),range(batch_size,len(x_train),batch_size)):
+            batch_x = x_train[start:end]
+            batch_y = y_train[start:end]
+            j = j+1
             sess.run(train, feed_dict={inp: batch_x, oup: batch_y })
-            loss, acc = sess.run([cost, accuracy], feed_dict={inp: val_x, oup: val_y})
-            print('epoch:', i, 'batch no:', j, 'loss:', loss, 'accuracy:', acc)
+        loss, acc = sess.run([cost, accuracy], feed_dict={inp:x_val, oup:y_val})
+        print('epoch:', i, 'loss:', loss, 'accuracy:', acc)
 
 
