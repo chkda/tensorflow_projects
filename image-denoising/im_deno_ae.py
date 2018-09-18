@@ -4,12 +4,10 @@
 # pylint: disable=C0330
 # pylint: disable=C0305
 # pylint: disable=C0301
-from PIL import Image
 import numpy as np
 import tensorflow as tf
 from sklearn.datasets import load_files
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 import cv2 
 
 
