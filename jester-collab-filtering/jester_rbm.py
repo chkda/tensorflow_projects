@@ -1,19 +1,32 @@
+# pylint: disable=invalid-name
+# pylint: disable=missing-docstring
+# pylint: disable=C0326
+# pylint: disable=C0330
+# pylint: disable=C0305
+# pylint: disable=C0301
 import numpy as np 
 import pandas as pd 
 import tensorflow as tf
 
 
-data_1 = pd.read_csv('F:/my files/python files/neural networks/tensorflow_projects/jester-collab-filtering/UserRatings1.csv')
-data_2 = pd.read_csv('F:/my files/python files/neural networks/tensorflow_projects/jester-collab-filtering/UserRatings2.csv')
+data_1 = pd.read_csv('F:/my files/python files/neural networks/tensorflow_projects/jester-collab-filtering/UserRatings1.csv',dtype='str',na_filter=False)
+data_2 = pd.read_csv('F:/my files/python files/neural networks/tensorflow_projects/jester-collab-filtering/UserRatings2.csv',dtype='str',na_filter=False)
 data_1 = data_1.drop(['JokeId'],axis=1)
 data_2 = data_2.drop(['JokeId'],axis=1)
+#data_1 = data_1.dropna()
+#data_2 = data_2.dropna()
 data = pd.concat([data_1,data_2],axis=1)
+#data = data.fillna('NaN',inplace=True)
+#data = data.dropna(inplace=True)
+print(data.shape)
 data = data.values
-data = np.nan_to_num(data)
+#data = np.nan_to_num(data)
 data = data.astype('float32')
 data = data.transpose()
-print(data[73420,:])
 
+
+
+'''
 inp = tf.placeholder(dtype='float32',shape=[None,100],name='input')
 weights = tf.placeholder(dtype='float32',shape=[100,50],name='weights')
 forw_bias = tf.placeholder(dtype='float32',shape=[50],name='forward_bias')
@@ -59,3 +72,4 @@ with tf.Session() as sess:
             prv_back_bias = cur_back_bias
         print(sess.run(err,feed_dict={inp:xtr,weights:prv_wts,forw_bias:prv_for_bias,back_bias:prv_back_bias}))
     print(data[73420,:])
+'''
